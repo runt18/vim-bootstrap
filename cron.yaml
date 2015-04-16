@@ -1,4 +1,0 @@
-cron:
-- description: awesome vim
-  url: /cron
-  schedule: every 4 hours

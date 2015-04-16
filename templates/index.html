@@ -41,6 +41,26 @@
 						<h2>Select your languages</h2>
 						<p></p>
 						<form class="clearfix" action="/generate.vim" method="post">
+
+							<div class="row">
+								<div class="12u">
+									{% for l in langs %}
+									<input type="checkbox" data="{{ plugins[l] }}" name="languages" value="{{ l }}" /> {{ l }}
+									{% endfor %}
+						         </div>
+					         </div>
+							<div class="row">
+								<div class="12u">
+									{% for av in awesomevim %}
+									{% if av.github_url %}
+									<input type="checkbox" name="plugins" value="{{ av.github_owner }}/{{ av.github_repo_name }}" /> {{ av.name }}
+									{% endif %}
+						            {% endfor %}
+						         </div>
+					         </div>
+
+
+
 							<div class="row">
 								<div class="12u">
 									{% for l in langs %}

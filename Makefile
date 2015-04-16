@@ -7,5 +7,8 @@ run:
 install:
 	pip install -r requirements.txt -t lib/
 
+cron:
+	python vimbootstrap/cron.py
+
 
 .PHONY: deploy run

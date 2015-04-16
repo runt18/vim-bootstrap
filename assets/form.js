@@ -1,5 +1,25 @@
 $(function () {
 
+	$("[name=languages][type=checkbox]").each(function() {
+        $this = $(this);
+
+		$this.on('click', function() {
+			$("[name=plugins]").prop("checked", false);
+			var plugins = [];
+
+			for (i = 0; i < $("[name=languages]:checked").length; i++){
+				plugin = $("[name=languages]:checked")[i].getAttribute("data").replace(", ", ",").split(",");
+				for (n = 0; n < plugin.length; n++){
+					plugins.push(plugin[n]);
+				}
+			}
+
+			for (i = 0; i < plugins.length; i++) {
+				$("[name=plugins][value="+ plugins[i] +"]").prop("checked", true);
+			};
+		});
+	});
+
     $('.logo-icon').each(function() {
         $this = $(this);
 

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
+import json
 import jinja2
 from google.appengine.api import memcache
 from jinja2 import Template
 from bottle import Bottle, request, response, static_file
 from bottle import TEMPLATE_PATH as T
-
-from vimbootstrap import cron
 
 
 PROJECT_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)))
@@ -29,13 +28,26 @@ def index():
         return os.path.isfile("{}/images/logo/{}.png".format(
             STATIC_PATH, file))
 
+    def bundle_list(file_name):
+        return ",".join(open(file_name).read().replace("/", "\/").split("\n"))
+
     langs = memcache.get('langs')
     if not langs:
         langs = os.listdir("./vim_template/langs")
         memcache.add('langs', langs, 3600)
 
+    awesomevim = json.loads(open("./awesomevim.json").read())
+    plugins = {}
+    for l in langs:
+        file_name = "./vim_template/langs/{}/bundle.list".format(l)
+        plugins[l] = ""
+        if os.path.exists(file_name):
+            plugins[l] = bundle_list(file_name)
+
     template = JINJA_ENVIRONMENT.get_template('index.html')
-    return template.render({'langs': langs, 'file_exist': file_exist})
+    return template.render({'langs': langs, 'file_exist': file_exist,
+                            "awesomevim": awesomevim,
+                            "plugins": plugins})
 
 
 @app.route('/generate.vim', method='POST')
@@ -80,11 +92,6 @@ def langs():
         memcache.add('langs', langs, 3600)
 
     return ",".join(langs)
-
-
-@app.route('/cron')
-def crond():
-    cron.main()
 
 
 @app.route('/robots.txt')
