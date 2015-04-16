@@ -5,5 +5,3 @@
 # by `appengine_config.py`.
 bottle
 jinja2
-urllib3
-requests
