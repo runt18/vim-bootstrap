@@ -6,6 +6,8 @@ from jinja2 import Template
 from bottle import Bottle, request, response, static_file
 from bottle import TEMPLATE_PATH as T
 
+from vimbootstrap import cron
+
 
 PROJECT_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 TEMPLATE_PATH = os.path.join(PROJECT_PATH, 'templates')
@@ -78,6 +80,11 @@ def langs():
         memcache.add('langs', langs, 3600)
 
     return ",".join(langs)
+
+
+@app.route('/cron')
+def crond():
+    cron.main()
 
 
 @app.route('/robots.txt')
