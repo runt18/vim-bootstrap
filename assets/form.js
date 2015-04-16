@@ -15,7 +15,10 @@ $(function () {
 			}
 
 			for (i = 0; i < plugins.length; i++) {
-				$("[name=plugins][value="+ plugins[i] +"]").prop("checked", true);
+				try {
+					$("[name=plugins][value="+ plugins[i] +"]").prop("checked", true);
+				}
+				catch(err) {}
 			};
 		});
 	});
