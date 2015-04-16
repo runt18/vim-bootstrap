@@ -53,20 +53,20 @@ def index():
 @app.route('/generate.vim', method='POST')
 def generate():
     editor = request.POST.get("editor", "vim")
-    langs = {"bundle": {}, "vim": {}, "editor": editor}
+    langs = {"vim": {}, "editor": editor}
+    langs["bundle"] = request.POST.getall('plugins')
     select_lang = request.POST.getall('langs')
     for l in select_lang:
 
         data = memcache.get('vim-{}'.format(l))
         if not data:
             cache = {}
-            for ext in ["bundle", "vim"]:
+            for ext in ["vim"]:
                 with open("./vim_template/langs/{0}/{0}.{1}".format(
                         l, ext)) as f:
                     cache[ext] = langs[ext][l] = f.read()
             memcache.add('vim-{}'.format(l), cache, 3600)
         else:
-            langs["bundle"][l] = data['bundle']
             langs["vim"][l] = data['vim']
 
     template = None

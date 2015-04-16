@@ -75,7 +75,7 @@ let g:vim_bootstrap_editor = "{{editor}}"				" nvim or vim
 
 "" Custom bundles
 {% for b in bundle %}
-{{ bundle[b] }}
+NeoBundle '{{ b }}'
 {% endfor %}
 
 "" Include user's extra bundle
