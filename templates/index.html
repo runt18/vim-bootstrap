@@ -45,32 +45,13 @@
 							<div class="row">
 								<div class="12u">
 									{% for l in langs %}
-									<input type="checkbox" data="{{ plugins[l] }}" name="languages" value="{{ l }}" /> {{ l }}
-									{% endfor %}
-						         </div>
-					         </div>
-							<div class="row">
-								<div class="12u">
-									{% for av in awesomevim %}
-									{% if av.github_url %}
-									<input type="checkbox" name="plugins" value="{{ av.github_owner }}/{{ av.github_repo_name }}" /> {{ av.name }}
-									{% endif %}
-						            {% endfor %}
-						         </div>
-					         </div>
-
-
-
-							<div class="row">
-								<div class="12u">
-									{% for l in langs %}
 						                <div class="input-group">
 						                    <span class="button-checkbox">
 						                    	<div class="placeholder">
 					                    				<img class="logo-icon" data-type="checkbox" data-value="{{l}}" src="/assets/images/logo/{{l}}.png">
 					                    		</div>
 					                    		<p>{{l}}</p>
-						                        <input type="checkbox" name="langs" value="{{l}}" class="hidden" />
+						                        <input type="checkbox" name="langs" value="{{l}}" data="{{ plugins[l] }}" class="hidden" />
 						                    </span>
 						                </div>
 						            {% endfor %}
@@ -101,6 +82,16 @@
 
 								</div>
 							</div>
+
+							<div class="row">
+								<div class="12u">
+									{% for av in awesomevim %}
+									{% if av.github_url %}
+									<input type="checkbox" name="plugins" value="{{ av.github_owner }}/{{ av.github_repo_name }}" /> {{ av.name }}
+									{% endif %}
+						            {% endfor %}
+						         </div>
+					         </div>
 
 				            <div class="row">
 								<div class="12u">

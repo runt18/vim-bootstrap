@@ -1,29 +1,5 @@
 $(function () {
-
-	$("[name=languages][type=checkbox]").each(function() {
-        $this = $(this);
-
-		$this.on('click', function() {
-			$("[name=plugins]").prop("checked", false);
-			var plugins = [];
-
-			for (i = 0; i < $("[name=languages]:checked").length; i++){
-				plugin = $("[name=languages]:checked")[i].getAttribute("data").replace(", ", ",").split(",");
-				for (n = 0; n < plugin.length; n++){
-					plugins.push(plugin[n]);
-				}
-			}
-
-			for (i = 0; i < plugins.length; i++) {
-				try {
-					$("[name=plugins][value="+ plugins[i] +"]").prop("checked", true);
-				}
-				catch(err) {}
-			};
-		});
-	});
-
-    $('.logo-icon').each(function() {
+	$('.logo-icon').each(function() {
         $this = $(this);
 
         $this.on('click', function() {
@@ -45,6 +21,26 @@ $(function () {
 					$(".logo-icon[data-type="+ $(this).data('type') +"]").removeClass('selected');
 				}
             };
+
+
+			// Plugins
+			$("[name=plugins]").prop("checked", false);
+			var plugins = [];
+
+			for (i = 0; i < $("[name=langs]:checked").length; i++){
+				plugin = $("[name=langs]:checked")[i].getAttribute("data").replace(", ", ",").split(",");
+				for (n = 0; n < plugin.length; n++){
+					plugins.push(plugin[n]);
+				}
+			}
+
+			for (i = 0; i < plugins.length; i++) {
+				try {
+					$("[name=plugins][value="+ plugins[i] +"]").prop("checked", true);
+				}
+				catch(err) {}
+			};
+
         });
     });
 
