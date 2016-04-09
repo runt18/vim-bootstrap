@@ -28,7 +28,7 @@ if os.environ.get('SERVER_SOFTWARE','').startswith('Development'):
 def index():
 
     def file_exist(file):
-        return os.path.isfile("{}/images/logo/{}.png".format(
+        return os.path.isfile("{0}/images/logo/{1}.png".format(
             STATIC_PATH, file))
 
     langs = memcache.get('langs')
@@ -48,14 +48,14 @@ def generate():
     select_lang = request.POST.getall('langs')
 
     for l in select_lang:
-        data = memcache.get('vim-{}'.format(l))
+        data = memcache.get('vim-{0}'.format(l))
         if not data:
             cache = {}
             for ext in ["bundle", "vim"]:
                 with open("./vim_template/langs/{0}/{0}.{1}".format(
                         l, ext)) as f:
                     cache[ext] = ctx[ext][l] = f.read()
-            memcache.add('vim-{}'.format(l), cache, 3600)
+            memcache.add('vim-{0}'.format(l), cache, 3600)
         else:
             ctx["bundle"][l] = data['bundle']
             ctx["vim"][l] = data['vim']

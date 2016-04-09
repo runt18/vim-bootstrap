@@ -55,4 +55,4 @@ def get_editor(name):
     try:
         return EDITORS[name](name)
     except KeyError:
-        raise ValueError("Unknown editor '{}'".format(name))
+        raise ValueError("Unknown editor '{0}'".format(name))
