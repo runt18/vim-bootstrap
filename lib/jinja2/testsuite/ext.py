@@ -113,7 +113,7 @@ class TestExtension(Extension):
         ])]).set_lineno(next(parser.stream).lineno)
 
     def _dump(self, sandboxed, ext_attr, imported_object, context):
-        return '%s|%s|%s|%s' % (
+        return '{0!s}|{1!s}|{2!s}|{3!s}'.format(
             sandboxed,
             ext_attr,
             imported_object,

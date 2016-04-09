@@ -130,9 +130,9 @@ class Node(with_metaclass(NodeType, object)):
         if fields:
             if len(fields) != len(self.fields):
                 if not self.fields:
-                    raise TypeError('%r takes 0 arguments' %
-                                    self.__class__.__name__)
-                raise TypeError('%r takes 0 or %d argument%s' % (
+                    raise TypeError('{0!r} takes 0 arguments'.format(
+                                    self.__class__.__name__))
+                raise TypeError('{0!r} takes 0 or {1:d} argument{2!s}'.format(
                     self.__class__.__name__,
                     len(self.fields),
                     len(self.fields) != 1 and 's' or ''
@@ -142,8 +142,8 @@ class Node(with_metaclass(NodeType, object)):
         for attr in self.attributes:
             setattr(self, attr, attributes.pop(attr, None))
         if attributes:
-            raise TypeError('unknown attribute %r' %
-                            next(iter(attributes)))
+            raise TypeError('unknown attribute {0!r}'.format(
+                            next(iter(attributes))))
 
     def iter_fields(self, exclude=None, only=None):
         """This method iterates over all fields that are defined and yields
@@ -236,9 +236,9 @@ class Node(with_metaclass(NodeType, object)):
     __hash__ = object.__hash__
 
     def __repr__(self):
-        return '%s(%s)' % (
+        return '{0!s}({1!s})'.format(
             self.__class__.__name__,
-            ', '.join('%s=%r' % (arg, getattr(self, arg, None)) for
+            ', '.join('{0!s}={1!r}'.format(arg, getattr(self, arg, None)) for
                       arg in self.fields)
         )
 
@@ -719,7 +719,7 @@ class Operand(Helper):
 
 if __debug__:
     Operand.__doc__ += '\nThe following operators are available: ' + \
-        ', '.join(sorted('``%s``' % x for x in set(_binop_to_func) |
+        ', '.join(sorted('``{0!s}``'.format(x) for x in set(_binop_to_func) |
                   set(_uaop_to_func) | set(_cmpop_to_func)))
 
 

@@ -98,10 +98,10 @@ class TemplateSyntaxError(TemplateError):
             return self.message
 
         # otherwise attach some stuff
-        location = 'line %d' % self.lineno
+        location = 'line {0:d}'.format(self.lineno)
         name = self.filename or self.name
         if name:
-            location = 'File "%s", %s' % (name, location)
+            location = 'File "{0!s}", {1!s}'.format(name, location)
         lines = [self.message, '  ' + location]
 
         # if the source is set, add the line to the output

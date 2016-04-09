@@ -17,7 +17,7 @@ from jinja2._compat import text_type, string_types, implements_iterator, \
 
 _word_split_re = re.compile(r'(\s+)')
 _punctuation_re = re.compile(
-    '^(?P<lead>(?:%s)*)(?P<middle>.*?)(?P<trail>(?:%s)*)$' % (
+    '^(?P<lead>(?:{0!s})*)(?P<middle>.*?)(?P<trail>(?:{1!s})*)$'.format(
         '|'.join(map(re.escape, ('(', '<', '&lt;'))),
         '|'.join(map(re.escape, ('.', ',', ')', '>', '\n', '&gt;')))
     )
@@ -167,7 +167,7 @@ def object_type_repr(obj):
         name = obj.__class__.__name__
     else:
         name = obj.__class__.__module__ + '.' + obj.__class__.__name__
-    return '%s object' % name
+    return '{0!s} object'.format(name)
 
 
 def pformat(obj, verbose=False):
@@ -213,15 +213,15 @@ def urlize(text, trim_url_limit=None, nofollow=False):
                     middle.endswith('.net') or
                     middle.endswith('.com')
                 )):
-                middle = '<a href="http://%s"%s>%s</a>' % (middle,
+                middle = '<a href="http://{0!s}"{1!s}>{2!s}</a>'.format(middle,
                     nofollow_attr, trim_url(middle))
             if middle.startswith('http://') or \
                middle.startswith('https://'):
-                middle = '<a href="%s"%s>%s</a>' % (middle,
+                middle = '<a href="{0!s}"{1!s}>{2!s}</a>'.format(middle,
                     nofollow_attr, trim_url(middle))
             if '@' in middle and not middle.startswith('www.') and \
                not ':' in middle and _simple_email_re.match(middle):
-                middle = '<a href="mailto:%s">%s</a>' % (middle, middle)
+                middle = '<a href="mailto:{0!s}">{1!s}</a>'.format(middle, middle)
             if lead + middle + trail != word:
                 words[i] = lead + middle + trail
     return u''.join(words)
@@ -273,7 +273,7 @@ def generate_lorem_ipsum(n=5, html=True, min=20, max=100):
 
     if not html:
         return u'\n\n'.join(result)
-    return Markup(u'\n'.join(u'<p>%s</p>' % escape(x) for x in result))
+    return Markup(u'\n'.join(u'<p>{0!s}</p>'.format(escape(x)) for x in result))
 
 
 def unicode_urlencode(obj, charset='utf-8'):
@@ -372,7 +372,7 @@ class LRUCache(object):
         return len(self._mapping)
 
     def __repr__(self):
-        return '<%s %r>' % (
+        return '<{0!s} {1!r}>'.format(
             self.__class__.__name__,
             self._mapping
         )

@@ -103,7 +103,7 @@ class ProcessedTraceback(object):
     def render_as_html(self, full=False):
         """Return a unicode string with the traceback as rendered HTML."""
         from jinja2.debugrenderer import render_traceback
-        return u'%s\n\n<!--\n%s\n-->' % (
+        return u'{0!s}\n\n<!--\n{1!s}\n-->'.format(
             render_traceback(self, full=full),
             self.render_as_text().decode('utf-8', 'replace')
         )
@@ -242,7 +242,7 @@ def fake_exc_info(exc_info, filename, lineno):
             if function == 'root':
                 location = 'top-level template code'
             elif function.startswith('block_'):
-                location = 'block "%s"' % function[6:]
+                location = 'block "{0!s}"'.format(function[6:])
             else:
                 location = 'template'
         code = code_type(0, code.co_nlocals, code.co_stacksize,

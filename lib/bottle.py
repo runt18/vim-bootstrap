@@ -330,11 +330,11 @@ class Router(object):
                 if mode == 'default': mode = self.default_filter
                 mask, in_filter, out_filter = self.filters[mode](conf)
                 if not key:
-                    pattern += '(?:%s)' % mask
-                    key = 'anon%d' % anons
+                    pattern += '(?:{0!s})'.format(mask)
+                    key = 'anon{0:d}'.format(anons)
                     anons += 1
                 else:
-                    pattern += '(?P<%s>%s)' % (key, mask)
+                    pattern += '(?P<{0!s}>{1!s})'.format(key, mask)
                     keys.append(key)
                 if in_filter: filters.append((key, in_filter))
                 builder.append((key, out_filter or str))
@@ -351,10 +351,10 @@ class Router(object):
             return
 
         try:
-            re_pattern = re.compile('^(%s)$' % pattern)
+            re_pattern = re.compile('^({0!s})$'.format(pattern))
             re_match = re_pattern.match
         except re.error:
-            raise RouteSyntaxError("Could not add Route: %s (%s)" % (rule, _e()))
+            raise RouteSyntaxError("Could not add Route: {0!s} ({1!s})".format(rule, _e()))
 
         if filters:
             def getargs(path):
@@ -392,7 +392,7 @@ class Router(object):
         for x in range(0, len(all_rules), maxgroups):
             some = all_rules[x:x+maxgroups]
             combined = (flatpat for (_, flatpat, _, _) in some)
-            combined = '|'.join('(^%s$)' % flatpat for flatpat in combined)
+            combined = '|'.join('(^{0!s}$)'.format(flatpat) for flatpat in combined)
             combined = re.compile(combined).match
             rules = [(target, getargs) for (_, _, target, getargs) in some]
             comborules.append((combined, rules))
@@ -402,11 +402,11 @@ class Router(object):
         builder = self.builder.get(_name)
         if not builder: raise RouteBuildError("No route with that name.", _name)
         try:
-            for i, value in enumerate(anons): query['anon%d'%i] = value
+            for i, value in enumerate(anons): query['anon{0:d}'.format(i)] = value
             url = ''.join([f(query.pop(n)) if n else f for (n,f) in builder])
             return url if not query else url+'?'+urlencode(query)
         except KeyError:
-            raise RouteBuildError('Missing URL argument: %r' % _e().args[0])
+            raise RouteBuildError('Missing URL argument: {0!r}'.format(_e().args[0]))
 
     def match(self, environ):
         ''' Return a (target, url_agrs) tuple or raise HTTPError(400/404/405). '''
@@ -559,7 +559,7 @@ class Route(object):
 
     def __repr__(self):
         cb = self.get_undecorated_callback()
-        return '<%s %r %r>' % (self.method, self.rule, cb)
+        return '<{0!s} {1!r} {2!r}>'.format(self.method, self.rule, cb)
 
 
 
@@ -691,7 +691,7 @@ class Bottle(object):
         options.setdefault('mountpoint', {'prefix': prefix, 'target': app})
         options['callback'] = mountpoint_wrapper
 
-        self.route('/%s/<:re:.*>' % '/'.join(segments), **options)
+        self.route('/{0!s}/<:re:.*>'.format('/'.join(segments)), **options)
         if not prefix.endswith('/'):
             self.route('/' + '/'.join(segments), **options)
 
@@ -942,7 +942,7 @@ class Bottle(object):
             encoder = lambda x: x.encode(response.charset)
             new_iter = imap(encoder, itertools.chain([first], iout))
         else:
-            msg = 'Unsupported response type: %s' % type(first)
+            msg = 'Unsupported response type: {0!s}'.format(type(first))
             return self._cast(HTTPError(500, msg))
         if hasattr(out, 'close'):
             new_iter = _closeiter(new_iter, out.close)
@@ -963,8 +963,7 @@ class Bottle(object):
             raise
         except Exception:
             if not self.catchall: raise
-            err = '<h1>Critical error while processing request: %s</h1>' \
-                  % html_escape(environ.get('PATH_INFO', '/'))
+            err = '<h1>Critical error while processing request: {0!s}</h1>'.format(html_escape(environ.get('PATH_INFO', '/')))
             if DEBUG:
                 err += '<h2>Error:</h2>\n<pre>\n%s\n</pre>\n' \
                        '<h2>Traceback:</h2>\n<pre>\n%s\n</pre>\n' \
@@ -1380,19 +1379,19 @@ class BaseRequest(object):
             self.environ.pop('bottle.request.'+key, None)
 
     def __repr__(self):
-        return '<%s: %s %s>' % (self.__class__.__name__, self.method, self.url)
+        return '<{0!s}: {1!s} {2!s}>'.format(self.__class__.__name__, self.method, self.url)
 
     def __getattr__(self, name):
         ''' Search in self.environ for additional user defined attributes. '''
         try:
-            var = self.environ['bottle.request.ext.%s'%name]
+            var = self.environ['bottle.request.ext.{0!s}'.format(name)]
             return var.__get__(self) if hasattr(var, '__get__') else var
         except KeyError:
-            raise AttributeError('Attribute %r not defined.' % name)
+            raise AttributeError('Attribute {0!r} not defined.'.format(name))
 
     def __setattr__(self, name, value):
         if name == 'environ': return object.__setattr__(self, name, value)
-        self.environ['bottle.request.ext.%s'%name] = value
+        self.environ['bottle.request.ext.{0!s}'.format(name)] = value
 
 
 
@@ -1405,7 +1404,7 @@ class HeaderProperty(object):
     def __init__(self, name, reader=None, writer=str, default=''):
         self.name, self.default = name, default
         self.reader, self.writer = reader, writer
-        self.__doc__ = 'Current value of the %r header.' % name.title()
+        self.__doc__ = 'Current value of the {0!r} header.'.format(name.title())
 
     def __get__(self, obj, cls):
         if obj is None: return self
@@ -1499,7 +1498,7 @@ class BaseResponse(object):
             raise ValueError('String status line without a reason phrase.')
         if not 100 <= code <= 999: raise ValueError('Status code out of range.')
         self._status_code = code
-        self._status_line = str(status or ('%d Unknown' % code))
+        self._status_line = str(status or ('{0:d} Unknown'.format(code)))
 
     def _get_status(self):
         return self._status_line
@@ -1639,7 +1638,7 @@ class BaseResponse(object):
     def __repr__(self):
         out = ''
         for name, value in self.headerlist:
-            out += '%s: %s\n' % (name.title(), value.strip())
+            out += '{0!s}: {1!s}\n'.format(name.title(), value.strip())
         return out
 
 
@@ -1975,10 +1974,10 @@ class WSGIHeaderDict(DictMixin):
         return tonat(self.environ[self._ekey(key)], 'latin1')
 
     def __setitem__(self, key, value):
-        raise TypeError("%s is read-only." % self.__class__)
+        raise TypeError("{0!s} is read-only.".format(self.__class__))
 
     def __delitem__(self, key):
-        raise TypeError("%s is read-only." % self.__class__)
+        raise TypeError("{0!s} is read-only.".format(self.__class__))
 
     def __iter__(self):
         for key in self.environ:
@@ -2031,8 +2030,8 @@ class ConfigDict(dict):
         def keys(self): return [x for x in self]
         def __len__(self): return len(self.keys())
         def __contains__(self, key): return self._prefix + '.' + key in self._config
-        def __repr__(self): return '<Config.Namespace %s.*>' % self._prefix
-        def __str__(self): return '<Config.Namespace %s.*>' % self._prefix
+        def __repr__(self): return '<Config.Namespace {0!s}.*>'.format(self._prefix)
+        def __str__(self): return '<Config.Namespace {0!s}.*>'.format(self._prefix)
 
         # Deprecated ConfigDict features
         def __getattr__(self, key):
@@ -2102,10 +2101,10 @@ class ConfigDict(dict):
         while stack:
             prefix, source = stack.pop()
             if not isinstance(source, dict):
-                raise TypeError('Source is not a dict (r)' % type(key))
+                raise TypeError('Source is not a dict (r)'.format(*type(key)))
             for key, value in source.items():
                 if not isinstance(key, str):
-                    raise TypeError('Key is not a string (%r)' % type(key))
+                    raise TypeError('Key is not a string ({0!r})'.format(type(key)))
                 full_key = prefix + '.' + key if prefix else key
                 if isinstance(value, dict):
                     stack.append((full_key, value))
@@ -2133,7 +2132,7 @@ class ConfigDict(dict):
 
     def __setitem__(self, key, value):
         if not isinstance(key, str):
-            raise TypeError('Key has type %r (not a string)' % type(key))
+            raise TypeError('Key has type {0!r} (not a string)'.format(type(key)))
 
         value = self.meta_get(key, 'filter', lambda x: x)(value)
         if key in self and self[key] is value:
@@ -2326,7 +2325,7 @@ class ResourceManager(object):
     def open(self, name, mode='r', *args, **kwargs):
         ''' Find a resource and return a file object, or raise IOError. '''
         fname = self.lookup(name)
-        if not fname: raise IOError("Resource %r not found." % name)
+        if not fname: raise IOError("Resource {0!r} not found.".format(name))
         return self.opener(fname, mode=mode, *args, **kwargs)
 
 
@@ -2466,12 +2465,12 @@ def static_file(filename, root, mimetype='auto', download=False, charset='UTF-8'
 
     if mimetype:
         if mimetype[:5] == 'text/' and charset and 'charset' not in mimetype:
-            mimetype += '; charset=%s' % charset
+            mimetype += '; charset={0!s}'.format(charset)
         headers['Content-Type'] = mimetype
 
     if download:
         download = os.path.basename(filename if download == True else download)
-        headers['Content-Disposition'] = 'attachment; filename="%s"' % download
+        headers['Content-Disposition'] = 'attachment; filename="{0!s}"'.format(download)
 
     stats = os.stat(filename)
     headers['Content-Length'] = clen = stats.st_size
@@ -2494,7 +2493,7 @@ def static_file(filename, root, mimetype='auto', download=False, charset='UTF-8'
         if not ranges:
             return HTTPError(416, "Requested Range Not Satisfiable")
         offset, end = ranges[0]
-        headers["Content-Range"] = "bytes %d-%d/%d" % (offset, end-1, clen)
+        headers["Content-Range"] = "bytes {0:d}-{1:d}/{2:d}".format(offset, end-1, clen)
         headers["Content-Length"] = str(end-offset)
         if body: body = _file_iter_range(body, offset, end-offset)
         return HTTPResponse(body, status=206, **headers)
@@ -2609,8 +2608,8 @@ def html_escape(string):
 
 def html_quote(string):
     ''' Escape and quote a string to be used as an HTTP attribute.'''
-    return '"%s"' % html_escape(string).replace('\n','&#10;')\
-                    .replace('\r','&#13;').replace('\t','&#9;')
+    return '"{0!s}"'.format(html_escape(string).replace('\n','&#10;')\
+                    .replace('\r','&#13;').replace('\t','&#9;'))
 
 
 def yieldroutes(func):
@@ -2629,7 +2628,7 @@ def yieldroutes(func):
     path += ('/<%s>' * argc) % tuple(spec[0][:argc])
     yield path
     for arg in spec[0][argc:]:
-        path += '/<%s>' % arg
+        path += '/<{0!s}>'.format(arg)
         yield path
 
 
@@ -2657,7 +2656,7 @@ def path_shift(script_name, path_info, shift=1):
         scriptlist = scriptlist[:shift]
     else:
         empty = 'SCRIPT_NAME' if shift < 0 else 'PATH_INFO'
-        raise AssertionError("Cannot shift. Nothing left from %s" % empty)
+        raise AssertionError("Cannot shift. Nothing left from {0!s}".format(empty))
     new_script_name = '/' + '/'.join(scriptlist)
     new_path_info = '/' + '/'.join(pathlist)
     if path_info.endswith('/') and pathlist: new_path_info += '/'
@@ -2672,7 +2671,7 @@ def auth_basic(check, realm="private", text="Access denied"):
             user, password = request.auth or (None, None)
             if user is None or not check(user, password):
                 err = HTTPError(401, text)
-                err.add_header('WWW-Authenticate', 'Basic realm="%s"' % realm)
+                err.add_header('WWW-Authenticate', 'Basic realm="{0!s}"'.format(realm))
                 return err
             return func(*a, **ka)
         return wrapper
@@ -2723,8 +2722,8 @@ class ServerAdapter(object):
         pass
 
     def __repr__(self):
-        args = ', '.join(['%s=%s'%(k,repr(v)) for k, v in self.options.items()])
-        return "%s(%s)" % (self.__class__.__name__, args)
+        args = ', '.join(['{0!s}={1!s}'.format(k, repr(v)) for k, v in self.options.items()])
+        return "{0!s}({1!s})".format(self.__class__.__name__, args)
 
 
 class CGIServer(ServerAdapter):
@@ -2917,7 +2916,7 @@ class GunicornServer(ServerAdapter):
     def run(self, handler):
         from gunicorn.app.base import Application
 
-        config = {'bind': "%s:%d" % (self.host, int(self.port))}
+        config = {'bind': "{0!s}:{1:d}".format(self.host, int(self.port))}
         config.update(self.options)
 
         class GunicornApplication(Application):
@@ -3016,7 +3015,7 @@ def load(target, **namespace):
     if target.isalnum(): return getattr(sys.modules[module], target)
     package_name = module.split('.')[0]
     namespace[package_name] = sys.modules[package_name]
-    return eval('%s.%s' % (module, target), namespace)
+    return eval('{0!s}.{1!s}'.format(module, target), namespace)
 
 
 def load_app(target):
@@ -3083,7 +3082,7 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         if isinstance(app, basestring):
             app = load_app(app)
         if not callable(app):
-            raise ValueError("Application is not callable: %r" % app)
+            raise ValueError("Application is not callable: {0!r}".format(app))
 
         for plugin in plugins or []:
             app.install(plugin)
@@ -3095,12 +3094,12 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         if isinstance(server, type):
             server = server(host=host, port=port, **kargs)
         if not isinstance(server, ServerAdapter):
-            raise ValueError("Unknown or unsupported server: %r" % server)
+            raise ValueError("Unknown or unsupported server: {0!r}".format(server))
 
         server.quiet = server.quiet or quiet
         if not server.quiet:
-            _stderr("Bottle v%s server starting up (using %s)...\n" % (__version__, repr(server)))
-            _stderr("Listening on http://%s:%d/\n" % (server.host, server.port))
+            _stderr("Bottle v{0!s} server starting up (using {1!s})...\n".format(__version__, repr(server)))
+            _stderr("Listening on http://{0!s}:{1:d}/\n".format(server.host, server.port))
             _stderr("Hit Ctrl-C to quit.\n\n")
 
         if reloader:
@@ -3206,7 +3205,7 @@ class BaseTemplate(object):
         if not self.source and self.name:
             self.filename = self.search(self.name, self.lookup)
             if not self.filename:
-                raise TemplateError('Template %s not found.' % repr(name))
+                raise TemplateError('Template {0!s} not found.'.format(repr(name)))
         if not self.source and not self.filename:
             raise TemplateError('No template specified.')
         self.prepare(**self.settings)
@@ -3229,8 +3228,8 @@ class BaseTemplate(object):
             if not fname.startswith(spath): continue
             if os.path.isfile(fname): return fname
             for ext in cls.extensions:
-                if os.path.isfile('%s.%s' % (fname, ext)):
-                    return '%s.%s' % (fname, ext)
+                if os.path.isfile('{0!s}.{1!s}'.format(fname, ext)):
+                    return '{0!s}.{1!s}'.format(fname, ext)
 
     @classmethod
     def global_config(cls, key, *args):
@@ -3424,7 +3423,7 @@ class StplParser(object):
     # Match the start tokens of code areas in a template
     _re_split = '(?m)^[ \t]*(\\\\?)((%(line_start)s)|(%(block_start)s))(%%?)'
     # Match inline statements (may contain python strings)
-    _re_inl = '%%(inline_start)s((?:%s|[^\'"\n]*?)+)%%(inline_end)s' % _re_inl
+    _re_inl = '%(inline_start)s((?:{0!s}|[^\'"\n]*?)+)%(inline_end)s'.format(_re_inl)
 
     default_syntax = '<% %> % {{ }}'
 
@@ -3534,13 +3533,13 @@ class StplParser(object):
             if lines[-1].endswith('\\\\\n'): lines[-1] = lines[-1][:-3]
             elif lines[-1].endswith('\\\\\r\n'): lines[-1] = lines[-1][:-4]
             parts.append(nl.join(map(repr, lines)))
-        code = '_printlist((%s,))' % ', '.join(parts)
+        code = '_printlist(({0!s},))'.format(', '.join(parts))
         self.lineno += code.count('\n')+1
         self.write_code(code)
 
     def process_inline(self, chunk):
-        if chunk[0] == '!': return '_str(%s)' % chunk[1:]
-        return '_escape(%s)' % chunk
+        if chunk[0] == '!': return '_str({0!s})'.format(chunk[1:])
+        return '_escape({0!s})'.format(chunk)
 
     def write_code(self, line, comment=''):
         line, comment = self.fix_backward_compatibility(line, comment)
@@ -3553,8 +3552,8 @@ class StplParser(object):
         if parts and parts[0] in ('include', 'rebase'):
             depr('The include and rebase keywords are functions now.') #0.12
             if len(parts) == 1:   return "_printlist([base])", comment
-            elif len(parts) == 2: return "_=%s(%r)" % tuple(parts), comment
-            else:                 return "_=%s(%r, %s)" % tuple(parts), comment
+            elif len(parts) == 2: return "_={0!s}({1!r})".format(*tuple(parts)), comment
+            else:                 return "_={0!s}({1!r}, {2!s})".format(*tuple(parts)), comment
         if self.lineno <= 2 and not line.strip() and 'coding' in comment:
             m = re.match(r"#.*coding[:=]\s*([-\w.]+)", comment)
             if m:
@@ -3587,7 +3586,7 @@ def template(*args, **kwargs):
         else:
             TEMPLATES[tplid] = adapter(name=tpl, lookup=lookup, **settings)
     if not TEMPLATES[tplid]:
-        abort(500, 'Template (%s) not found' % tpl)
+        abort(500, 'Template ({0!s}) not found'.format(tpl))
     for dictarg in args[1:]: kwargs.update(dictarg)
     return TEMPLATES[tplid].render(kwargs)
 
@@ -3646,43 +3645,43 @@ HTTP_CODES[428] = "Precondition Required"
 HTTP_CODES[429] = "Too Many Requests"
 HTTP_CODES[431] = "Request Header Fields Too Large"
 HTTP_CODES[511] = "Network Authentication Required"
-_HTTP_STATUS_LINES = dict((k, '%d %s'%(k,v)) for (k,v) in HTTP_CODES.items())
+_HTTP_STATUS_LINES = dict((k, '{0:d} {1!s}'.format(k, v)) for (k,v) in HTTP_CODES.items())
 
 #: The default template used for error pages. Override with @error()
 ERROR_PAGE_TEMPLATE = """
-%%try:
-    %%from %s import DEBUG, HTTP_CODES, request, touni
+%try:
+    %from {0!s} import DEBUG, HTTP_CODES, request, touni
     <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
     <html>
         <head>
-            <title>Error: {{e.status}}</title>
+            <title>Error: {{{{e.status}}}}</title>
             <style type="text/css">
-              html {background-color: #eee; font-family: sans;}
-              body {background-color: #fff; border: 1px solid #ddd;
-                    padding: 15px; margin: 15px;}
-              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+              html {{background-color: #eee; font-family: sans;}}
+              body {{background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}}
+              pre {{background-color: #eee; border: 1px solid #ddd; padding: 5px;}}
             </style>
         </head>
         <body>
-            <h1>Error: {{e.status}}</h1>
-            <p>Sorry, the requested URL <tt>{{repr(request.url)}}</tt>
+            <h1>Error: {{{{e.status}}}}</h1>
+            <p>Sorry, the requested URL <tt>{{{{repr(request.url)}}}}</tt>
                caused an error:</p>
-            <pre>{{e.body}}</pre>
-            %%if DEBUG and e.exception:
+            <pre>{{{{e.body}}}}</pre>
+            %if DEBUG and e.exception:
               <h2>Exception:</h2>
-              <pre>{{repr(e.exception)}}</pre>
-            %%end
-            %%if DEBUG and e.traceback:
+              <pre>{{{{repr(e.exception)}}}}</pre>
+            %end
+            %if DEBUG and e.traceback:
               <h2>Traceback:</h2>
-              <pre>{{e.traceback}}</pre>
-            %%end
+              <pre>{{{{e.traceback}}}}</pre>
+            %end
         </body>
     </html>
-%%except ImportError:
+%except ImportError:
     <b>ImportError:</b> Could not generate the error page. Please add bottle to
     the import path.
-%%end
-""" % __name__
+%end
+""".format(__name__)
 
 #: A thread-safe instance of :class:`LocalRequest`. If accessed from within a
 #: request callback, this instance always refers to the *current* request
@@ -3708,7 +3707,7 @@ ext = _ImportRedirect('bottle.ext' if __name__ == '__main__' else __name__+".ext
 if __name__ == '__main__':
     opt, args, parser = _cmd_options, _cmd_args, _cmd_parser
     if opt.version:
-        _stdout('Bottle %s\n'%__version__)
+        _stdout('Bottle {0!s}\n'.format(__version__))
         sys.exit(0)
     if not args:
         parser.print_help()

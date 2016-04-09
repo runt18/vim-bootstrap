@@ -410,7 +410,7 @@ class Environment(object):
         """
         func = self.filters.get(name)
         if func is None:
-            raise TemplateRuntimeError('no filter named %r' % name)
+            raise TemplateRuntimeError('no filter named {0!r}'.format(name))
         args = [value] + list(args or ())
         if getattr(func, 'contextfilter', False):
             if context is None:
@@ -435,7 +435,7 @@ class Environment(object):
         """
         func = self.tests.get(name)
         if func is None:
-            raise TemplateRuntimeError('no test named %r' % name)
+            raise TemplateRuntimeError('no test named {0!r}'.format(name))
         return func(value, *(args or ()), **(kwargs or {}))
 
     @internalcode
@@ -658,11 +658,11 @@ class Environment(object):
             from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED, ZIP_STORED
             zip_file = ZipFile(target, 'w', dict(deflated=ZIP_DEFLATED,
                                                  stored=ZIP_STORED)[zip])
-            log_function('Compiling into Zip archive "%s"' % target)
+            log_function('Compiling into Zip archive "{0!s}"'.format(target))
         else:
             if not os.path.isdir(target):
                 os.makedirs(target)
-            log_function('Compiling into folder "%s"' % target)
+            log_function('Compiling into folder "{0!s}"'.format(target))
 
         try:
             for name in self.list_templates(extensions, filter_func):
@@ -672,7 +672,7 @@ class Environment(object):
                 except TemplateSyntaxError as e:
                     if not ignore_errors:
                         raise
-                    log_function('Could not compile "%s": %s' % (name, e))
+                    log_function('Could not compile "{0!s}": {1!s}'.format(name, e))
                     continue
 
                 filename = ModuleLoader.get_module_filename(name)
@@ -681,11 +681,10 @@ class Environment(object):
                     c = self._compile(code, encode_filename(filename))
                     write_file(filename + 'c', py_header +
                                marshal.dumps(c), 'wb')
-                    log_function('Byte-compiled "%s" as %s' %
-                                 (name, filename + 'c'))
+                    log_function('Byte-compiled "{0!s}" as {1!s}'.format(name, filename + 'c'))
                 else:
                     write_file(filename, code, 'w')
-                    log_function('Compiled "%s" as %s' % (name, filename))
+                    log_function('Compiled "{0!s}" as {1!s}'.format(name, filename))
         finally:
             if zip:
                 zip_file.close()
@@ -1053,10 +1052,10 @@ class Template(object):
 
     def __repr__(self):
         if self.name is None:
-            name = 'memory:%x' % id(self)
+            name = 'memory:{0:x}'.format(id(self))
         else:
             name = repr(self.name)
-        return '<%s %s>' % (self.__class__.__name__, name)
+        return '<{0!s} {1!s}>'.format(self.__class__.__name__, name)
 
 
 @implements_to_string
@@ -1079,10 +1078,10 @@ class TemplateModule(object):
 
     def __repr__(self):
         if self.__name__ is None:
-            name = 'memory:%x' % id(self)
+            name = 'memory:{0:x}'.format(id(self))
         else:
             name = repr(self.__name__)
-        return '<%s %s>' % (self.__class__.__name__, name)
+        return '<{0!s} {1!s}>'.format(self.__class__.__name__, name)
 
 
 class TemplateExpression(object):

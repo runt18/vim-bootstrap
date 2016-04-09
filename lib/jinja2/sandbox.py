@@ -99,8 +99,8 @@ def safe_range(*args):
     """
     rng = range(*args)
     if len(rng) > MAX_RANGE:
-        raise OverflowError('range too big, maximum size for range is %d' %
-                            MAX_RANGE)
+        raise OverflowError('range too big, maximum size for range is {0:d}'.format(
+                            MAX_RANGE))
     return rng
 
 
@@ -352,7 +352,7 @@ class SandboxedEnvironment(Environment):
         # the double prefixes are to avoid double keyword argument
         # errors when proxying the call.
         if not __self.is_safe_callable(__obj):
-            raise SecurityError('%r is not safely callable' % (__obj,))
+            raise SecurityError('{0!r} is not safely callable'.format(__obj))
         return __context.call(__obj, *args, **kwargs)
 
 
