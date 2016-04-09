@@ -3185,7 +3185,7 @@ class BaseTemplate(object):
     settings = {} #used in prepare()
     defaults = {} #used in render()
 
-    def __init__(self, source=None, name=None, lookup=[], encoding='utf8', **settings):
+    def __init__(self, source=None, name=None, lookup=None, encoding='utf8', **settings):
         """ Create a new template.
         If the source parameter (str or buffer) is missing, the name argument
         is used to guess a template filename. Subclasses can assume that
@@ -3196,6 +3196,8 @@ class BaseTemplate(object):
         The encoding parameter should be used to decode byte strings or files.
         The settings parameter contains a dict for engine-specific settings.
         """
+        if lookup is None:
+            lookup = []
         self.name = name
         self.source = source.read() if hasattr(source, 'read') else source
         self.filename = source.filename if hasattr(source, 'filename') else None
@@ -3212,9 +3214,11 @@ class BaseTemplate(object):
         self.prepare(**self.settings)
 
     @classmethod
-    def search(cls, name, lookup=[]):
+    def search(cls, name, lookup=None):
         """ Search name in all directories specified in lookup.
         First without, then with common extensions. Return first hit. """
+        if lookup is None:
+                lookup = []
         if not lookup:
             depr('The template lookup path list should not be empty.') #0.12
             lookup = ['.']
@@ -3298,7 +3302,9 @@ class CheetahTemplate(BaseTemplate):
 
 
 class Jinja2Template(BaseTemplate):
-    def prepare(self, filters=None, tests=None, globals={}, **kwargs):
+    def prepare(self, filters=None, tests=None, globals=None, **kwargs):
+        if globals is None:
+            globals = {}
         from jinja2 import Environment, FunctionLoader
         if 'prefix' in kwargs: # TODO: to be removed after a while
             raise RuntimeError('The keyword argument `prefix` has been removed. '
