@@ -940,8 +940,6 @@ FILTERS = {
     'escape':               escape,
     'e':                    escape,
     'forceescape':          do_forceescape,
-    'capitalize':           do_capitalize,
-    'title':                do_title,
     'default':              do_default,
     'd':                    do_default,
     'join':                 do_join,
