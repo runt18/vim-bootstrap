@@ -63,8 +63,7 @@ class JinjaTestCase(unittest.TestCase):
         except Exception as e:
             tb = format_exception(*sys.exc_info())
             if re.search(expected_tb.strip(), ''.join(tb)) is None:
-                raise self.fail('Traceback did not match:\n\n%s\nexpected:\n%s'
-                    % (''.join(tb), expected_tb))
+                raise self.fail('Traceback did not match:\n\n{0!s}\nexpected:\n{1!s}'.format(''.join(tb), expected_tb))
         else:
             self.fail('Expected exception')
 
@@ -77,7 +76,7 @@ def find_all_tests(suite):
         try:
             suites.extend(s)
         except TypeError:
-            yield s, '%s.%s.%s' % (
+            yield s, '{0!s}.{1!s}.{2!s}'.format(
                 s.__class__.__module__,
                 s.__class__.__name__,
                 s._testMethodName
@@ -110,7 +109,7 @@ class BetterLoader(unittest.TestLoader):
                 all_tests.append(testcase)
 
         if not all_tests:
-            raise LookupError('could not find test case for "%s"' % name)
+            raise LookupError('could not find test case for "{0!s}"'.format(name))
 
         if len(all_tests) == 1:
             return all_tests[0]
@@ -153,4 +152,4 @@ def main():
     try:
         unittest.main(testLoader=BetterLoader(), defaultTest='suite')
     except Exception as e:
-        print('Error: %s' % e)
+        print('Error: {0!s}'.format(e))

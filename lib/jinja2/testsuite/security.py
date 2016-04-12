@@ -131,10 +131,10 @@ class SandboxTestCase(JinjaTestCase):
         for expr, ctx, rv in ('1 + 2', {}, '3'), ('a + 2', {'a': 2}, '4'):
             env = SandboxedEnvironment()
             env.binop_table['+'] = disable_op
-            t = env.from_string('{{ %s }}' % expr)
+            t = env.from_string('{{{{ {0!s} }}}}'.format(expr))
             assert t.render(ctx) == rv
             env.intercepted_binops = frozenset(['+'])
-            t = env.from_string('{{ %s }}' % expr)
+            t = env.from_string('{{{{ {0!s} }}}}'.format(expr))
             try:
                 t.render(ctx)
             except TemplateRuntimeError as e:
@@ -148,10 +148,10 @@ class SandboxTestCase(JinjaTestCase):
         for expr, ctx, rv in ('-1', {}, '-1'), ('-a', {'a': 2}, '-2'):
             env = SandboxedEnvironment()
             env.unop_table['-'] = disable_op
-            t = env.from_string('{{ %s }}' % expr)
+            t = env.from_string('{{{{ {0!s} }}}}'.format(expr))
             assert t.render(ctx) == rv
             env.intercepted_unops = frozenset(['-'])
-            t = env.from_string('{{ %s }}' % expr)
+            t = env.from_string('{{{{ {0!s} }}}}'.format(expr))
             try:
                 t.render(ctx)
             except TemplateRuntimeError as e:

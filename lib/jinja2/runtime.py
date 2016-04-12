@@ -81,7 +81,7 @@ class TemplateReference(object):
         return BlockReference(name, self.__context, blocks, 0)
 
     def __repr__(self):
-        return '<%s %r>' % (
+        return '<{0!s} {1!r}>'.format(
             self.__class__.__name__,
             self.__context.name
         )
@@ -235,7 +235,7 @@ class Context(object):
         return item
 
     def __repr__(self):
-        return '<%s %s of %r>' % (
+        return '<{0!s} {1!s} of {2!r}>'.format(
             self.__class__.__name__,
             repr(self.get_all()),
             self.name
@@ -264,8 +264,8 @@ class BlockReference(object):
         """Super the block."""
         if self._depth + 1 >= len(self._stack):
             return self._context.environment. \
-                undefined('there is no parent block called %r.' %
-                          self.name, name='super')
+                undefined('there is no parent block called {0!r}.'.format(
+                          self.name), name='super')
         return BlockReference(self.name, self._context, self._stack,
                               self._depth + 1)
 
@@ -346,7 +346,7 @@ class LoopContext(object):
         return self._length
 
     def __repr__(self):
-        return '<%s %r/%r>' % (
+        return '<{0!s} {1!r}/{2!r}>'.format(
             self.__class__.__name__,
             self.index,
             self.length
@@ -407,7 +407,7 @@ class Macro(object):
                         value = self.defaults[idx - self._argument_count + off]
                     except IndexError:
                         value = self._environment.undefined(
-                            'parameter %r was not provided' % name, name=name)
+                            'parameter {0!r} was not provided'.format(name), name=name)
                 arguments.append(value)
 
         # it's important that the order of these arguments does not change
@@ -422,17 +422,15 @@ class Macro(object):
         if self.catch_kwargs:
             arguments.append(kwargs)
         elif kwargs:
-            raise TypeError('macro %r takes no keyword argument %r' %
-                            (self.name, next(iter(kwargs))))
+            raise TypeError('macro {0!r} takes no keyword argument {1!r}'.format(self.name, next(iter(kwargs))))
         if self.catch_varargs:
             arguments.append(args[self._argument_count:])
         elif len(args) > self._argument_count:
-            raise TypeError('macro %r takes not more than %d argument(s)' %
-                            (self.name, len(self.arguments)))
+            raise TypeError('macro {0!r} takes not more than {1:d} argument(s)'.format(self.name, len(self.arguments)))
         return self._func(*arguments)
 
     def __repr__(self):
-        return '<%s %s>' % (
+        return '<{0!s} {1!s}>'.format(
             self.__class__.__name__,
             self.name is None and 'anonymous' or repr(self.name)
         )
@@ -469,14 +467,14 @@ class Undefined(object):
         """
         if self._undefined_hint is None:
             if self._undefined_obj is missing:
-                hint = '%r is undefined' % self._undefined_name
+                hint = '{0!r} is undefined'.format(self._undefined_name)
             elif not isinstance(self._undefined_name, string_types):
-                hint = '%s has no element %r' % (
+                hint = '{0!s} has no element {1!r}'.format(
                     object_type_repr(self._undefined_obj),
                     self._undefined_name
                 )
             else:
-                hint = '%r has no attribute %r' % (
+                hint = '{0!r} has no attribute {1!r}'.format(
                     object_type_repr(self._undefined_obj),
                     self._undefined_name
                 )
@@ -542,12 +540,12 @@ class DebugUndefined(Undefined):
     def __str__(self):
         if self._undefined_hint is None:
             if self._undefined_obj is missing:
-                return u'{{ %s }}' % self._undefined_name
-            return '{{ no such element: %s[%r] }}' % (
+                return u'{{{{ {0!s} }}}}'.format(self._undefined_name)
+            return '{{{{ no such element: {0!s}[{1!r}] }}}}'.format(
                 object_type_repr(self._undefined_obj),
                 self._undefined_name
             )
-        return u'{{ undefined value printed: %s }}' % self._undefined_hint
+        return u'{{{{ undefined value printed: {0!s} }}}}'.format(self._undefined_hint)
 
 
 @implements_to_string

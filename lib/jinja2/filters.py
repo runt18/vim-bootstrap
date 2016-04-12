@@ -160,7 +160,7 @@ def do_xmlattr(_eval_ctx, d, autospace=True):
     if the filter returned something unless the second parameter is false.
     """
     rv = u' '.join(
-        u'%s="%s"' % (escape(key), escape(value))
+        u'{0!s}="{1!s}"'.format(escape(key), escape(value))
         for key, value in iteritems(d)
         if value is not None and not isinstance(value, Undefined)
     )
@@ -390,13 +390,13 @@ def do_filesizeformat(value, binary=False):
     if bytes == 1:
         return '1 Byte'
     elif bytes < base:
-        return '%d Bytes' % bytes
+        return '{0:d} Bytes'.format(bytes)
     else:
         for i, prefix in enumerate(prefixes):
             unit = base ** (i + 2)
             if bytes < unit:
-                return '%.1f %s' % ((base * bytes / unit), prefix)
-        return '%.1f %s' % ((base * bytes / unit), prefix)
+                return '{0:.1f} {1!s}'.format((base * bytes / unit), prefix)
+        return '{0:.1f} {1!s}'.format((base * bytes / unit), prefix)
 
 
 def do_pprint(value, verbose=False):
@@ -823,8 +823,8 @@ def do_map(*args, **kwargs):
     if len(args) == 2 and 'attribute' in kwargs:
         attribute = kwargs.pop('attribute')
         if kwargs:
-            raise FilterArgumentError('Unexpected keyword argument %r' %
-                next(iter(kwargs)))
+            raise FilterArgumentError('Unexpected keyword argument {0!r}'.format(
+                next(iter(kwargs))))
         func = make_attrgetter(context.environment, attribute)
     else:
         try:

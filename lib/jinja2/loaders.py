@@ -86,8 +86,8 @@ class BaseLoader(object):
         the template will be reloaded.
         """
         if not self.has_source_access:
-            raise RuntimeError('%s cannot provide access to the source' %
-                               self.__class__.__name__)
+            raise RuntimeError('{0!s} cannot provide access to the source'.format(
+                               self.__class__.__name__))
         raise TemplateNotFound(template)
 
     def list_templates(self):
@@ -424,7 +424,7 @@ class ModuleLoader(BaseLoader):
     has_source_access = False
 
     def __init__(self, path):
-        package_name = '_jinja2_module_templates_%x' % id(self)
+        package_name = '_jinja2_module_templates_{0:x}'.format(id(self))
 
         # create a fake module that looks for the templates in the
         # path given.
@@ -455,7 +455,7 @@ class ModuleLoader(BaseLoader):
     @internalcode
     def load(self, environment, name, globals=None):
         key = self.get_template_key(name)
-        module = '%s.%s' % (self.package_name, key)
+        module = '{0!s}.{1!s}'.format(self.package_name, key)
         mod = getattr(self.module, module, None)
         if mod is None:
             try:

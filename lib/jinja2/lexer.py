@@ -42,7 +42,7 @@ except SyntaxError:
     name_re = re.compile(r'\b[a-zA-Z_][a-zA-Z0-9_]*\b')
 else:
     from jinja2 import _stringdefs
-    name_re = re.compile(r'[%s][%s]*' % (_stringdefs.xid_start,
+    name_re = re.compile(r'[{0!s}][{1!s}]*'.format(_stringdefs.xid_start,
                                          _stringdefs.xid_continue))
 
 float_re = re.compile(r'(?<!\.)\d+\.\d+')
@@ -131,8 +131,8 @@ operators = {
 
 reverse_operators = dict([(v, k) for k, v in iteritems(operators)])
 assert len(operators) == len(reverse_operators), 'operators dropped'
-operator_re = re.compile('(%s)' % '|'.join(re.escape(x) for x in
-                         sorted(operators, key=lambda x: -len(x))))
+operator_re = re.compile('({0!s})'.format('|'.join(re.escape(x) for x in
+                         sorted(operators, key=lambda x: -len(x)))))
 
 ignored_tokens = frozenset([TOKEN_COMMENT_BEGIN, TOKEN_COMMENT,
                             TOKEN_COMMENT_END, TOKEN_WHITESPACE,
@@ -258,7 +258,7 @@ class Token(tuple):
         return False
 
     def __repr__(self):
-        return 'Token(%r, %r, %r)' % (
+        return 'Token({0!r}, {1!r}, {2!r})'.format(
             self.lineno,
             self.type,
             self.value
@@ -368,8 +368,7 @@ class TokenStream(object):
                                           'expected %r.' % expr,
                                           self.current.lineno,
                                           self.name, self.filename)
-            raise TemplateSyntaxError("expected token %r, got %r" %
-                                      (expr, describe_token(self.current)),
+            raise TemplateSyntaxError("expected token {0!r}, got {1!r}".format(expr, describe_token(self.current)),
                                       self.current.lineno,
                                       self.name, self.filename)
         try:
@@ -439,35 +438,35 @@ class Lexer(object):
             # use '{%+' to manually disable lstrip_blocks behavior
             no_lstrip_re = e('+')
             # detect overlap between block and variable or comment strings
-            block_diff = c(r'^%s(.*)' % e(environment.block_start_string))
+            block_diff = c(r'^{0!s}(.*)'.format(e(environment.block_start_string)))
             # make sure we don't mistake a block for a variable or a comment
             m = block_diff.match(environment.comment_start_string)
-            no_lstrip_re += m and r'|%s' % e(m.group(1)) or ''
+            no_lstrip_re += m and r'|{0!s}'.format(e(m.group(1))) or ''
             m = block_diff.match(environment.variable_start_string)
-            no_lstrip_re += m and r'|%s' % e(m.group(1)) or ''
+            no_lstrip_re += m and r'|{0!s}'.format(e(m.group(1))) or ''
 
             # detect overlap between comment and variable strings
-            comment_diff = c(r'^%s(.*)' % e(environment.comment_start_string))
+            comment_diff = c(r'^{0!s}(.*)'.format(e(environment.comment_start_string)))
             m = comment_diff.match(environment.variable_start_string)
-            no_variable_re = m and r'(?!%s)' % e(m.group(1)) or ''
+            no_variable_re = m and r'(?!{0!s})'.format(e(m.group(1))) or ''
 
             lstrip_re = r'^[ \t]*'
-            block_prefix_re = r'%s%s(?!%s)|%s\+?' % (
+            block_prefix_re = r'{0!s}{1!s}(?!{2!s})|{3!s}\+?'.format(
                     lstrip_re,
                     e(environment.block_start_string),
                     no_lstrip_re,
-                    e(environment.block_start_string),
+                    e(environment.block_start_string)
                     )
-            comment_prefix_re = r'%s%s%s|%s\+?' % (
+            comment_prefix_re = r'{0!s}{1!s}{2!s}|{3!s}\+?'.format(
                     lstrip_re,
                     e(environment.comment_start_string),
                     no_variable_re,
-                    e(environment.comment_start_string),
+                    e(environment.comment_start_string)
                     )
             prefix_re['block'] = block_prefix_re
             prefix_re['comment'] = comment_prefix_re
         else:
-            block_prefix_re = '%s' % e(environment.block_start_string)
+            block_prefix_re = '{0!s}'.format(e(environment.block_start_string))
 
         self.newline_sequence = environment.newline_sequence
         self.keep_trailing_newline = environment.keep_trailing_newline
@@ -476,22 +475,22 @@ class Lexer(object):
         self.rules = {
             'root': [
                 # directives
-                (c('(.*?)(?:%s)' % '|'.join(
-                    [r'(?P<raw_begin>(?:\s*%s\-|%s)\s*raw\s*(?:\-%s\s*|%s))' % (
+                (c('(.*?)(?:{0!s})'.format('|'.join(
+                    [r'(?P<raw_begin>(?:\s*{0!s}\-|{1!s})\s*raw\s*(?:\-{2!s}\s*|{3!s}))'.format(
                         e(environment.block_start_string),
                         block_prefix_re,
                         e(environment.block_end_string),
                         e(environment.block_end_string)
                     )] + [
-                        r'(?P<%s_begin>\s*%s\-|%s)' % (n, r, prefix_re.get(n,r))
+                        r'(?P<{0!s}_begin>\s*{1!s}\-|{2!s})'.format(n, r, prefix_re.get(n,r))
                         for n, r in root_tag_rules
-                    ])), (TOKEN_DATA, '#bygroup'), '#bygroup'),
+                    ]))), (TOKEN_DATA, '#bygroup'), '#bygroup'),
                 # data
                 (c('.+'), TOKEN_DATA, None)
             ],
             # comments
             TOKEN_COMMENT_BEGIN: [
-                (c(r'(.*?)((?:\-%s\s*|%s)%s)' % (
+                (c(r'(.*?)((?:\-{0!s}\s*|{1!s}){2!s})'.format(
                     e(environment.comment_end_string),
                     e(environment.comment_end_string),
                     block_suffix_re
@@ -500,7 +499,7 @@ class Lexer(object):
             ],
             # blocks
             TOKEN_BLOCK_BEGIN: [
-                (c('(?:\-%s\s*|%s)%s' % (
+                (c('(?:\-{0!s}\s*|{1!s}){2!s}'.format(
                     e(environment.block_end_string),
                     e(environment.block_end_string),
                     block_suffix_re
@@ -508,14 +507,14 @@ class Lexer(object):
             ] + tag_rules,
             # variables
             TOKEN_VARIABLE_BEGIN: [
-                (c('\-%s\s*|%s' % (
+                (c('\-{0!s}\s*|{1!s}'.format(
                     e(environment.variable_end_string),
                     e(environment.variable_end_string)
                 )), TOKEN_VARIABLE_END, '#pop')
             ] + tag_rules,
             # raw block
             TOKEN_RAW_BEGIN: [
-                (c('(.*?)((?:\s*%s\-|%s)\s*endraw\s*(?:\-%s\s*|%s%s))' % (
+                (c('(.*?)((?:\s*{0!s}\-|{1!s})\s*endraw\s*(?:\-{2!s}\s*|{3!s}{4!s}))'.format(
                     e(environment.block_start_string),
                     block_prefix_re,
                     e(environment.block_end_string),
@@ -672,8 +671,8 @@ class Lexer(object):
                             balancing_stack.append(']')
                         elif data in ('}', ')', ']'):
                             if not balancing_stack:
-                                raise TemplateSyntaxError('unexpected \'%s\'' %
-                                                          data, lineno, name,
+                                raise TemplateSyntaxError('unexpected \'{0!s}\''.format(
+                                                          data), lineno, name,
                                                           filename)
                             expected_op = balancing_stack.pop()
                             if expected_op != data:
@@ -728,6 +727,5 @@ class Lexer(object):
                 if pos >= source_length:
                     return
                 # something went wrong
-                raise TemplateSyntaxError('unexpected char %r at %d' %
-                                          (source[pos], pos), lineno,
+                raise TemplateSyntaxError('unexpected char {0!r} at {1:d}'.format(source[pos], pos), lineno,
                                           name, filename)

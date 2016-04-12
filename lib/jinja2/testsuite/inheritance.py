@@ -141,7 +141,7 @@ class InheritanceTestCase(JinjaTestCase):
         }))
         tmpl = env.get_template('child')
         for m in range(1, 3):
-            assert tmpl.render(master='master%d' % m) == 'MASTER%dCHILD' % m
+            assert tmpl.render(master='master{0:d}'.format(m)) == 'MASTER{0:d}CHILD'.format(m)
 
     def test_multi_inheritance(self):
         env = Environment(loader=DictLoader({

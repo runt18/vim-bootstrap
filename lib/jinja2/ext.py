@@ -233,8 +233,8 @@ class InternationalizationExtension(Extension):
 
             name = parser.stream.expect('name')
             if name.value in variables:
-                parser.fail('translatable variable %r defined twice.' %
-                            name.value, name.lineno,
+                parser.fail('translatable variable {0!r} defined twice.'.format(
+                            name.value), name.lineno,
                             exc=TemplateAssertionError)
 
             # expressions
@@ -275,8 +275,8 @@ class InternationalizationExtension(Extension):
             if parser.stream.current.type != 'block_end':
                 name = parser.stream.expect('name')
                 if name.value not in variables:
-                    parser.fail('unknown variable %r for pluralization' %
-                                name.value, name.lineno,
+                    parser.fail('unknown variable {0!r} for pluralization'.format(
+                                name.value), name.lineno,
                                 exc=TemplateAssertionError)
                 plural_expr = variables[name.value]
                 num_called_num = name.value == 'num'
@@ -318,7 +318,7 @@ class InternationalizationExtension(Extension):
                 next(parser.stream)
                 name = parser.stream.expect('name').value
                 referenced.append(name)
-                buf.append('%%(%s)s' % name)
+                buf.append('%({0!s})s'.format(name))
                 parser.stream.expect('variable_end')
             elif parser.stream.current.type == 'block_begin':
                 next(parser.stream)

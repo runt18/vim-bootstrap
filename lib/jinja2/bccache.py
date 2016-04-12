@@ -222,7 +222,7 @@ class FileSystemBytecodeCache(BytecodeCache):
             raise RuntimeError('Cannot determine safe temp directory.  You '
                                'need to explicitly provide one.')
 
-        dirname = '_jinja2-cache-%d' % os.getuid()
+        dirname = '_jinja2-cache-{0:d}'.format(os.getuid())
         actual_dir = os.path.join(tmpdir, dirname)
         try:
             os.mkdir(actual_dir, stat.S_IRWXU) # 0o700

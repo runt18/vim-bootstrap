@@ -83,7 +83,7 @@ class LexerTestCase(JinjaTestCase):
 
     def test_string_escapes(self):
         for char in u'\0', u'\u2668', u'\xe4', u'\t', u'\r', u'\n':
-            tmpl = env.from_string('{{ %s }}' % jinja_string_repr(char))
+            tmpl = env.from_string('{{{{ {0!s} }}}}'.format(jinja_string_repr(char)))
             assert tmpl.render() == char
         assert env.from_string('{{ "\N{HOT SPRINGS}" }}').render() == u'\u2668'
 
@@ -97,7 +97,7 @@ class LexerTestCase(JinjaTestCase):
         for test, expect in iteritems(operators):
             if test in '([{}])':
                 continue
-            stream = env.lexer.tokenize('{{ %s }}' % test)
+            stream = env.lexer.tokenize('{{{{ {0!s} }}}}'.format(test))
             next(stream)
             assert stream.current.type == expect
 
@@ -330,9 +330,9 @@ class SyntaxTestCase(JinjaTestCase):
         for should_fail, sig in tests:
             if should_fail:
                 self.assert_raises(TemplateSyntaxError,
-                    env.from_string, '{{ foo(%s) }}' % sig)
+                    env.from_string, '{{{{ foo({0!s}) }}}}'.format(sig))
             else:
-                env.from_string('foo(%s)' % sig)
+                env.from_string('foo({0!s})'.format(sig))
 
     def test_tuple_expr(self):
         for tmpl in [
@@ -358,10 +358,10 @@ class SyntaxTestCase(JinjaTestCase):
 
     def test_constant_casing(self):
         for const in True, False, None:
-            tmpl = env.from_string('{{ %s }}|{{ %s }}|{{ %s }}' % (
+            tmpl = env.from_string('{{{{ {0!s} }}}}|{{{{ {1!s} }}}}|{{{{ {2!s} }}}}'.format(
                 str(const), str(const).lower(), str(const).upper()
             ))
-            assert tmpl.render() == '%s|%s|' % (const, const)
+            assert tmpl.render() == '{0!s}|{1!s}|'.format(const, const)
 
     def test_test_chaining(self):
         self.assert_raises(TemplateSyntaxError, env.from_string,
@@ -494,7 +494,7 @@ hello
 ${item} ## the rest of the stuff
    <% endfor %>''')
         assert tmpl.render(seq=range(5)) == \
-                ''.join('%s\n' % x for x in range(5))
+                ''.join('{0!s}\n'.format(x) for x in range(5))
         
     def test_lstrip_angle_bracket_compact(self):
         env = Environment('<%', '%>', '${', '}', '<%#', '%>', '%', '##',
@@ -505,7 +505,7 @@ ${item} ## the rest of the stuff
 ${item} ## the rest of the stuff
    <%endfor%>''')
         assert tmpl.render(seq=range(5)) == \
-                ''.join('%s\n' % x for x in range(5))
+                ''.join('{0!s}\n'.format(x) for x in range(5))
         
     def test_php_syntax_with_manual(self):
         env = Environment('<?', '?>', '<?=', '?>', '<!--', '-->',
@@ -525,7 +525,7 @@ ${item} ## the rest of the stuff
     <? for item in seq ?>
         <?= item ?>
     <? endfor ?>''')
-        assert tmpl.render(seq=range(5)) == ''.join('        %s\n' % x for x in range(5))
+        assert tmpl.render(seq=range(5)) == ''.join('        {0!s}\n'.format(x) for x in range(5))
 
     def test_php_syntax_compact(self):
         env = Environment('<?', '?>', '<?=', '?>', '<!--', '-->',
@@ -535,7 +535,7 @@ ${item} ## the rest of the stuff
     <?for item in seq?>
         <?=item?>
     <?endfor?>''')
-        assert tmpl.render(seq=range(5)) == ''.join('        %s\n' % x for x in range(5))
+        assert tmpl.render(seq=range(5)) == ''.join('        {0!s}\n'.format(x) for x in range(5))
 
     def test_erb_syntax(self):
         env = Environment('<%', '%>', '<%=', '%>', '<%#', '%>',
@@ -551,7 +551,7 @@ ${item} ## the rest of the stuff
     <%= item %>
     <% endfor %>
 ''')
-        assert tmpl.render(seq=range(5)) == ''.join('    %s\n' % x for x in range(5))
+        assert tmpl.render(seq=range(5)) == ''.join('    {0!s}\n'.format(x) for x in range(5))
 
     def test_erb_syntax_with_manual(self):
         env = Environment('<%', '%>', '<%=', '%>', '<%#', '%>',

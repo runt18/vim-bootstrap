@@ -56,7 +56,7 @@ class Parser(object):
             expected.extend(imap(describe_token_expr, exprs))
         if end_token_stack:
             currently_looking = ' or '.join(
-                "'%s'" % describe_token_expr(expr)
+                "'{0!s}'".format(describe_token_expr(expr))
                 for expr in end_token_stack[-1])
         else:
             currently_looking = None
@@ -64,7 +64,7 @@ class Parser(object):
         if name is None:
             message = ['Unexpected end of template.']
         else:
-            message = ['Encountered unknown tag \'%s\'.' % name]
+            message = ['Encountered unknown tag \'{0!s}\'.'.format(name)]
 
         if currently_looking:
             if name is not None and name in expected:
@@ -107,7 +107,7 @@ class Parser(object):
         """Return a new free identifier as :class:`~jinja2.nodes.InternalName`."""
         self._last_identifier += 1
         rv = object.__new__(nodes.InternalName)
-        nodes.Node.__init__(rv, 'fi%d' % self._last_identifier, lineno=lineno)
+        nodes.Node.__init__(rv, 'fi{0:d}'.format(self._last_identifier), lineno=lineno)
         return rv
 
     def parse_statement(self):
@@ -373,8 +373,8 @@ class Parser(object):
                 target = self.parse_primary()
             target.set_ctx('store')
         if not target.can_assign():
-            self.fail('can\'t assign to %r' % target.__class__.
-                      __name__.lower(), target.lineno)
+            self.fail('can\'t assign to {0!r}'.format(target.__class__.
+                      __name__.lower()), target.lineno)
         return target
 
     def parse_expression(self, with_condexpr=True):
@@ -572,7 +572,7 @@ class Parser(object):
         elif token.type == 'lbrace':
             node = self.parse_dict()
         else:
-            self.fail("unexpected '%s'" % describe_token(token), token.lineno)
+            self.fail("unexpected '{0!s}'".format(describe_token(token)), token.lineno)
         return node
 
     def parse_tuple(self, simplified=False, with_condexpr=True,
@@ -625,8 +625,8 @@ class Parser(object):
             # nothing) in the spot of an expression would be an empty
             # tuple.
             if not explicit_parentheses:
-                self.fail('Expected an expression, got \'%s\'' %
-                          describe_token(self.stream.current))
+                self.fail('Expected an expression, got \'{0!s}\''.format(
+                          describe_token(self.stream.current)))
 
         return nodes.Tuple(args, 'load', lineno=lineno)
 
